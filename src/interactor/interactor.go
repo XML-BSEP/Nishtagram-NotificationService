@@ -53,7 +53,7 @@ func (i *interactor) NewNotificationUsecase() usecase.NotificationUsecase {
 }
 
 func (i *interactor) NewNotificationServiceImpl() *implementation.NotificationServiceImpl {
-	return implementation.NewNotificationServiceImpl(i.NewNotificationUsecase(), i.followClient)
+	return implementation.NewNotificationServiceImpl(i.NewNotificationUsecase(), i.followClient, i.NewBlockNotificationUsecase())
 }
 
 func (i *interactor) NewNotificationRepository() repository.NotificationRepository {

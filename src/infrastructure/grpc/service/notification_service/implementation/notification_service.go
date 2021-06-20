@@ -6,9 +6,9 @@ import (
 	"io"
 	"notification-service/domain/enum"
 	"notification-service/infrastructure/grpc/service/follow_service"
+	pbFollow "notification-service/infrastructure/grpc/service/follow_service"
 	pb "notification-service/infrastructure/grpc/service/notification_service"
 	"notification-service/usecase"
-	pbFollow "notification-service/infrastructure/grpc/service/follow_service"
 )
 
 type NotificationServiceImpl struct {
@@ -19,8 +19,8 @@ type NotificationServiceImpl struct {
 }
 
 
-func NewNotificationServiceImpl(notificationUsecase usecase.NotificationUsecase, followClient follow_service.FollowServiceClient) *NotificationServiceImpl {
-	return &NotificationServiceImpl{NotificationUsecase: notificationUsecase, FollowClient: followClient}
+func NewNotificationServiceImpl(notificationUsecase usecase.NotificationUsecase, followClient follow_service.FollowServiceClient, blockNotificationUsecase usecase.BlockNotificationUsecase) *NotificationServiceImpl {
+	return &NotificationServiceImpl{NotificationUsecase: notificationUsecase, FollowClient: followClient, BlockNotificationUsecase: blockNotificationUsecase}
 }
 
 func (n *NotificationServiceImpl) SendNotification(ctx context.Context, in *pb.NotificationMessage) (*pb.EmptyMessage, error) {
