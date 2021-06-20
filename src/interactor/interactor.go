@@ -17,17 +17,21 @@ type interactor struct {
 	followClient follow_service.FollowServiceClient
 }
 
-
 type Interactor interface {
 	NewPusherService() pusher2.PusherService
 
 	NewNotificationUsecase() usecase.NotificationUsecase
+	NewBlockNotificationUsecase() usecase.BlockNotificationUsecase
 
 	NewNotificationRepository() repository.NotificationRepository
+	NewBlockNotificationRepository() repository.BlockNotificationRepository
 
 	NewNotificationServiceImpl() *implementation.NotificationServiceImpl
 
 	NewAppHandler() AppHandler
+
+
+
 }
 
 func NewInteractor(pusherClient *pusher.Client, db *mongo.Client, followClient follow_service.FollowServiceClient) Interactor {
@@ -63,4 +67,13 @@ type appHandler struct {
 type AppHandler interface {
 	handler.NotificationHandler
 }
+
+func (i *interactor) NewBlockNotificationUsecase() usecase.BlockNotificationUsecase {
+	return usecase.NewBlockNotificationUsecase(i.NewBlockNotificationRepository())
+}
+
+func (i *interactor) NewBlockNotificationRepository() repository.BlockNotificationRepository {
+	return repository.NewBlockNotificationRepository(i.db)
+}
+
 
