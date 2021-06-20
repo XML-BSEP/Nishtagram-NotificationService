@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "Nishtagram-FollowService/src/grpc/service/follow_service";
+
+service FollowService {
+  rpc SendUsers(User) returns (stream Follower);
+}
+
+message User {
+  string userId = 1;
+}
+message Follower {
+  string followerId = 1;
+}

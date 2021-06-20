@@ -1,5 +1,5 @@
 package domain
 
 type Profile struct {
-	Id 		string `json:"id"`
+	Id 		string `bson:"_id" json:"id"`
 }

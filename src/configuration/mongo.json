@@ -1,0 +1,13 @@
+{
+  "docker" : false,
+  "mongodb_uri_docker" : "mongodb://mongonotification:27017",
+  "mongodb_uri_localhost" : "mongodb://localhost:27020",
+  "server" : {
+    "address_docker" : "mongonotification",
+    "address_localhost" : "localhost",
+    "port" : 27020
+  },
+  "database" : "notification_db",
+  "production_server" : {
+  }
+}
