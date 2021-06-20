@@ -21,9 +21,9 @@ func NewBlockNotificationUsecase(blockNotificationRepository repository.BlockNot
 }
 
 func (b *blockNotificationUsecase) IsBlocked(context context.Context, sender, receiver string) (bool, error) {
-	return b.IsBlocked(context, sender, receiver)
+	return b.BlockNotificationRepository.IsBlocked(context, sender, receiver)
 }
 
 func (b *blockNotificationUsecase) Block(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string) error {
-	return b.Block(context, notificationType, blockedBy, blockedFor)
+	return b.BlockNotificationRepository.Block(context, notificationType, blockedBy, blockedFor)
 }
