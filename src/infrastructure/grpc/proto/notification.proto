@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "Nishtagram-NotificationService/src/grpc/service/notification_service";
+
+service Notification {
+  rpc SendNotification(NotificationMessage) returns (EmptyMessage);
+  rpc SendNotifications(MultipleNotificationsMessage) returns (EmptyMessage);
+}
+
+message MultipleNotificationsMessage {
+  string senderId = 1;
+  NotificationType notificationType = 2;
+  string redirectPath = 3;
+}
+
+message NotificationMessage {
+  string sender = 1;
+  string receiver = 2;
+  NotificationType notificationType = 3;
+  string redirectPath = 4;
+}
+message EmptyMessage {}
+enum NotificationType {
+    Like = 0;
+    Dislike = 1;
+    Comment = 2;
+    Post = 3;
+    Follow = 4;
+    Story = 5;
+}

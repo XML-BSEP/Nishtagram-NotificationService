@@ -1,0 +1,10 @@
+{
+  "docker" : false,
+  "pusher" : {
+    "APP_ID" : "1203996",
+    "APP_KEY" : "dd3ce2a9c4a58e3577a4",
+    "APP_SECRET" : "caebb43d64e3f9191e30",
+    "APP_CLUSTER" : "eu"
+  }
+
+}
