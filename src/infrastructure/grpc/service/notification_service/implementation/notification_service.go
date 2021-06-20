@@ -2,6 +2,7 @@ package implementation
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"notification-service/domain/enum"
 	"notification-service/infrastructure/grpc/service/follow_service"
@@ -14,6 +15,7 @@ type NotificationServiceImpl struct {
 	pb.UnimplementedNotificationServer
 	NotificationUsecase usecase.NotificationUsecase
 	FollowClient follow_service.FollowServiceClient
+	BlockNotificationUsecase usecase.BlockNotificationUsecase
 }
 
 
@@ -22,6 +24,12 @@ func NewNotificationServiceImpl(notificationUsecase usecase.NotificationUsecase,
 }
 
 func (n *NotificationServiceImpl) SendNotification(ctx context.Context, in *pb.NotificationMessage) (*pb.EmptyMessage, error) {
+
+	isBlocked, _ := n.BlockNotificationUsecase.IsBlocked(ctx, in.Sender, in.Receiver)
+
+	if isBlocked {
+		return nil, fmt.Errorf("")
+	}
 
 	notificationType := mapProtoNotificationtypeToNotificationType(in.NotificationType)
 	notification := n.NotificationUsecase.CreateNotification(in.Sender, in.Receiver, notificationType, in.RedirectPath)
@@ -42,6 +50,16 @@ func (n *NotificationServiceImpl) SendNotifications(ctx context.Context, in *pb.
 		if err == io.EOF {
 			break
 		}
+
+		if err != nil {
+			break
+		}
+		isBlocked, _ := n.BlockNotificationUsecase.IsBlocked(ctx, in.SenderId, ret.FollowerId)
+
+		if isBlocked {
+			break
+		}
+
 		notification := n.NotificationUsecase.CreateNotification(in.SenderId, ret.FollowerId, notificationType, in.RedirectPath)
 		n.NotificationUsecase.SendNotification(ctx, notification)
 		_ = n.NotificationUsecase.SaveNotification(ctx, notification)
