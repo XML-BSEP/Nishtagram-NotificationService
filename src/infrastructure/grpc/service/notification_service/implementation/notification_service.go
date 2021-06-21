@@ -8,7 +8,9 @@ import (
 	"notification-service/infrastructure/grpc/service/follow_service"
 	pbFollow "notification-service/infrastructure/grpc/service/follow_service"
 	pb "notification-service/infrastructure/grpc/service/notification_service"
+	"notification-service/infrastructure/grpc/service/user_service"
 	"notification-service/usecase"
+	pbUser "notification-service/infrastructure/grpc/service/user_service"
 )
 
 type NotificationServiceImpl struct {
@@ -16,23 +18,32 @@ type NotificationServiceImpl struct {
 	NotificationUsecase usecase.NotificationUsecase
 	FollowClient follow_service.FollowServiceClient
 	BlockNotificationUsecase usecase.BlockNotificationUsecase
+	UserClient user_service.UserDetailsClient
 }
 
 
-func NewNotificationServiceImpl(notificationUsecase usecase.NotificationUsecase, followClient follow_service.FollowServiceClient, blockNotificationUsecase usecase.BlockNotificationUsecase) *NotificationServiceImpl {
-	return &NotificationServiceImpl{NotificationUsecase: notificationUsecase, FollowClient: followClient, BlockNotificationUsecase: blockNotificationUsecase}
+func NewNotificationServiceImpl(notificationUsecase usecase.NotificationUsecase, followClient follow_service.FollowServiceClient, blockNotificationUsecase usecase.BlockNotificationUsecase, userClient user_service.UserDetailsClient) *NotificationServiceImpl {
+	return &NotificationServiceImpl{NotificationUsecase: notificationUsecase, FollowClient: followClient, BlockNotificationUsecase: blockNotificationUsecase, UserClient: userClient}
 }
 
 func (n *NotificationServiceImpl) SendNotification(ctx context.Context, in *pb.NotificationMessage) (*pb.EmptyMessage, error) {
 
+	if in.Sender == in.Receiver {
+		return nil, fmt.Errorf("")
+	}
 	isBlocked, _ := n.BlockNotificationUsecase.IsBlocked(ctx, in.Sender, in.Receiver)
 
 	if isBlocked {
 		return nil, fmt.Errorf("")
 	}
 
+
+	senderUsername, _ := n.UserClient.GetUsername(ctx, &pbUser.UserId{UserId: in.Sender})
 	notificationType := mapProtoNotificationtypeToNotificationType(in.NotificationType)
-	notification := n.NotificationUsecase.CreateNotification(in.Sender, in.Receiver, notificationType, in.RedirectPath)
+	notification := n.NotificationUsecase.CreateNotification(in.Sender, in.Receiver, notificationType, in.RedirectPath, senderUsername.Username)
+
+
+
 	n.NotificationUsecase.SendNotification(ctx, notification)
 	_ = n.NotificationUsecase.SaveNotification(ctx, notification)
 
@@ -54,13 +65,16 @@ func (n *NotificationServiceImpl) SendNotifications(ctx context.Context, in *pb.
 		if err != nil {
 			break
 		}
+		if in.SenderId == ret.FollowerId {
+			break
+		}
 		isBlocked, _ := n.BlockNotificationUsecase.IsBlocked(ctx, in.SenderId, ret.FollowerId)
 
 		if isBlocked {
 			break
 		}
-
-		notification := n.NotificationUsecase.CreateNotification(in.SenderId, ret.FollowerId, notificationType, in.RedirectPath)
+		senderUsername, _ := n.UserClient.GetUsername(ctx, &pbUser.UserId{UserId: in.SenderId})
+		notification := n.NotificationUsecase.CreateNotification(in.SenderId, ret.FollowerId, notificationType, in.RedirectPath, senderUsername.Username)
 		n.NotificationUsecase.SendNotification(ctx, notification)
 		_ = n.NotificationUsecase.SaveNotification(ctx, notification)
 	}

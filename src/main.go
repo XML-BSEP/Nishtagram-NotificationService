@@ -15,10 +15,20 @@ import (
 	pusher2 "notification-service/infrastructure/pusher"
 	"notification-service/infrastructure/seeder"
 	"notification-service/interactor"
+	userClient "notification-service/infrastructure/grpc/service/user_service/client"
+	"os"
+	"strconv"
 )
 
 func getNetListener(port uint) net.Listener {
-	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+	var domain string
+	if os.Getenv("DOCKER_ENV") == "" {
+		domain = "127.0.0.1"
+	} else {
+		domain = "notificationms"
+	}
+	domain = domain + ":" + strconv.Itoa(int(port))
+	lis, err := net.Listen("tcp", domain)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -38,7 +48,7 @@ func main() {
 
 
 	followClient, err := client.NewFollowClient("127.0.0.1:8077")
-
+	userClient, err := userClient.NewUserClient("127.0.0.1:8075")
 	if err != nil {
 		panic(err)
 	}
@@ -48,7 +58,7 @@ func main() {
 		panic("Can not create pusher client")
 	}
 
-	i := interactor.NewInteractor(pusherClient, mongoCli, followClient)
+	i := interactor.NewInteractor(pusherClient, mongoCli, followClient, userClient)
 	appHandler := i.NewAppHandler()
 
 	g := router.NewRoute(appHandler)

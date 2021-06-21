@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "Nishtagram-NotificationService/src/grpc/service/user_service";
+
+
+service UserDetails {
+  rpc GetUsername(UserId) returns (Username);
+}
+
+
+message Username {
+  string username = 1;
+}
+
+message UserId {
+  string userId = 1;
+}
