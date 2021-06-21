@@ -33,14 +33,11 @@ func (b *blockNotificationHandler) Block(ctx *gin.Context) {
 		return
 	}
 
-	for _, it := range notificationDto.NotificationType {
-		if it.Value {
-			notificationType := mapper.NotificationTypeDtoToNotificationType(it)
-			if err := b.BlockNotificationUsecase.Block(ctx, notificationType, notificationDto.UserFor, notificationDto.UserBy); err != nil {
-				ctx.JSON(400, gin.H{"message" : "Error blocking notifications"})
-				return
-			}
-		}
+	notificationType := mapper.NotificationTypeDtoToNotificationType(notificationDto.NotificationType)
+
+	if err := b.BlockNotificationUsecase.Block(ctx, notificationType, notificationDto.UserBy, notificationDto.UserFor); err != nil {
+		ctx.JSON(400, gin.H{"message" : "Can not block notification"})
+		return
 	}
 
 
