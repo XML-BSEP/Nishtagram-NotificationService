@@ -21,7 +21,7 @@ type NotificationUsecase interface {
 	GetNotificationsForUser(context context.Context, userId string) (*[]domain.Notification, error)
 	UpdateNotificationStatus(context context.Context, notificationId string, status bool) error
 	SaveNotification(context context.Context, notification domain.Notification) error
-	CreateNotification(sender string, receiver string, notificationType enum.NotificationType, redirectPath string) domain.Notification
+	CreateNotification(sender string, receiver string, notificationType enum.NotificationType, redirectPath string, senderUsername string) domain.Notification
 }
 
 func NewNotificationUsecase(pusherService pusher.PusherService, notificationRepository repository.NotificationRepository) NotificationUsecase {
@@ -34,12 +34,12 @@ func (n *notificationUsecase) SendNotification(context context.Context, notifica
 }
 
 
-func (n *notificationUsecase) CreateNotification(sender string, receiver string, notificationType enum.NotificationType, redirectPath string) domain.Notification {
+func (n *notificationUsecase) CreateNotification(sender string, receiver string, notificationType enum.NotificationType, redirectPath string, senderUsername string) domain.Notification {
 
 
 	id := uuid.NewString()
 	timestamp := time.Now()
-	notificationContent := n.CreateNotificationContent(sender, notificationType)
+	notificationContent := n.CreateNotificationContent(senderUsername, notificationType)
 
 
 	notification := domain.Notification{
@@ -51,6 +51,7 @@ func (n *notificationUsecase) CreateNotification(sender string, receiver string,
 		Type: notificationType,
 		NotificationFrom: domain.Profile{Id: sender},
 		NotificationTo: domain.Profile{Id: receiver},
+		SenderUsername: senderUsername,
 	}
 
 	return notification
@@ -79,6 +80,10 @@ func (n *notificationUsecase) CreateNotificationContent(sender string, notificat
 
 	if notificationType == enum.Comment {
 		return sender + " commented your post"
+	}
+
+	if notificationType == enum.Post {
+		return sender + " added new post"
 	}
 
 	return ""

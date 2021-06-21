@@ -4,6 +4,7 @@ import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"notification-service/domain"
 )
 
@@ -27,7 +28,9 @@ func NewNotificationRepository(db *mongo.Client) NotificationRepository {
 
 func (n *notificationRepository) GetNotificationsForUser(context context.Context, userId string) (*[]domain.Notification, error) {
 
-	filter, err := n.collection.Find(context, bson.M{"notification_to._id" : userId})
+	findOptions := options.Find()
+	findOptions.SetSort(bson.D{{"timestamp", -1}})
+	filter, err := n.collection.Find(context, bson.M{"notification_to._id" : userId}, findOptions)
 
 	if err != nil {
 		return nil, err

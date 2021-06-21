@@ -15,6 +15,7 @@ type Notification struct {
 	Type 	enum.NotificationType `bson:"type" json:"type"`
 	NotificationFrom Profile `bson:"notification_from" json:"notification_from"`
 	NotificationTo Profile `bson:"notification_to" json:"notification_to"`
+	SenderUsername string `bson:"sender_username" json:"sender_username"`
 }
 
 func NewNotification(content string, redirectPath string, read bool, notificationType enum.NotificationType, notificationFrom string, notificationTo string) Notification {
