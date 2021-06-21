@@ -20,7 +20,7 @@ type BlockNotificationRepository interface {
 	IsBlocked(context context.Context, sender, receiver string) (bool, error)
 	Block(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string) error
 	GetBlockedTypes(context context.Context, blockedBy, blockedFor string) ([]enum.NotificationType, error)
-	Unblock(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string)
+	Unblock(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string) (*mongo.DeleteResult,error)
 }
 
 func NewBlockNotificationRepository(db *mongo.Client) BlockNotificationRepository {
@@ -31,9 +31,10 @@ func NewBlockNotificationRepository(db *mongo.Client) BlockNotificationRepositor
 }
 
 func (b *blockNotificationRepository) IsBlocked(context context.Context, sender, receiver string) (bool, error) {
-
+	senderBson := bson.M{"_id" : sender}
+	receiverBson := bson.M{"_id" : receiver}
 	var blocked domain.BlockNotification
-	err := b.collection.FindOne(context, bson.M{"blocked_by._id" : receiver, "blocked_for._id" : sender}).Decode(&blocked)
+	err := b.collection.FindOne(context, bson.M{"blocked_by" : receiverBson, "blocked_for" : senderBson}).Decode(&blocked)
 
 	if err != nil {
 		return false, err
@@ -62,29 +63,49 @@ func (b *blockNotificationRepository) Block(context context.Context, notificatio
 }
 
 func (b *blockNotificationRepository) GetBlockedTypes(context context.Context, blockedBy, blockedFor string) ([]enum.NotificationType, error) {
+	blockedByBson := bson.M{"_id" : blockedBy}
+	blockedForBson := bson.M{"_id" : blockedFor}
 
-	filter, err := b.collection.Find(context, bson.M{"blocked_by" : blockedBy, "blocked_for" : blockedFor})
+	filter, err := b.collection.Find(context, bson.M{"blocked_by" : blockedByBson, "blocked_for" : blockedForBson})
 
 	if err != nil {
 		return nil, err
 	}
 
-	var blockedNotifications []domain.Notification
+	var blockedNotifications []domain.BlockNotification
 	if err := filter.All(context, &blockedNotifications); err != nil {
 		return nil, err
 	}
+	var notificationTypes []enum.NotificationType
 
-	notificationTypes := make([]enum.NotificationType, len(blockedNotifications))
+	//notificationTypes := make([]enum.NotificationType, len(blockedNotifications))
 
 	for _, it:= range blockedNotifications {
-		_ = append(notificationTypes, it.Type)
+		notificationTypes = append(notificationTypes, it.NotificationType)
 	}
 
 	return notificationTypes, nil
 }
 
-func (b *blockNotificationRepository) Unblock(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string) {
-	panic("implement me")
+func (b *blockNotificationRepository) Unblock(ctx context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string) (*mongo.DeleteResult, error) {
+
+	blockedByBson := bson.M{"_id" : blockedBy}
+	blockedForBson := bson.M{"_id" : blockedFor}
+	var blocked domain.BlockNotification
+	_ = b.collection.FindOne(ctx, bson.M{"blocked_by" : blockedByBson, "blocked_for" : blockedForBson, "notification_type" : notificationType}).Decode(&blocked)
+
+	//var notification domain.BlockNotification
+	//
+	//bsonBytes, _ := bson.Marshal(result)
+	//err := bson.Unmarshal(bsonBytes, &notification)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	result1, _ := b.collection.DeleteOne(ctx, bson.M{"_id" :blocked.ID})
+
+
+	return result1, nil
 }
 
 
