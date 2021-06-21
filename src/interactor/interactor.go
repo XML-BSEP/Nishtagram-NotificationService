@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"notification-service/infrastructure/grpc/service/follow_service"
 	"notification-service/infrastructure/grpc/service/notification_service/implementation"
+	"notification-service/infrastructure/grpc/service/user_service"
 	"notification-service/infrastructure/http/handler"
 	pusher2 "notification-service/infrastructure/pusher"
 	"notification-service/repository"
@@ -15,6 +16,7 @@ type interactor struct {
 	PusherClient *pusher.Client
 	db *mongo.Client
 	followClient follow_service.FollowServiceClient
+	userClient user_service.UserDetailsClient
 }
 
 type Interactor interface {
@@ -34,8 +36,8 @@ type Interactor interface {
 
 }
 
-func NewInteractor(pusherClient *pusher.Client, db *mongo.Client, followClient follow_service.FollowServiceClient) Interactor {
-	return &interactor{PusherClient: pusherClient, db : db, followClient: followClient}
+func NewInteractor(pusherClient *pusher.Client, db *mongo.Client, followClient follow_service.FollowServiceClient, userClient user_service.UserDetailsClient) Interactor {
+	return &interactor{PusherClient: pusherClient, db : db, followClient: followClient, userClient: userClient}
 }
 
 func (i *interactor) NewAppHandler() AppHandler {
@@ -53,7 +55,7 @@ func (i *interactor) NewNotificationUsecase() usecase.NotificationUsecase {
 }
 
 func (i *interactor) NewNotificationServiceImpl() *implementation.NotificationServiceImpl {
-	return implementation.NewNotificationServiceImpl(i.NewNotificationUsecase(), i.followClient)
+	return implementation.NewNotificationServiceImpl(i.NewNotificationUsecase(), i.followClient, i.NewBlockNotificationUsecase(), i.userClient)
 }
 
 func (i *interactor) NewNotificationRepository() repository.NotificationRepository {
