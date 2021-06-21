@@ -19,6 +19,8 @@ type blockNotificationRepository struct {
 type BlockNotificationRepository interface {
 	IsBlocked(context context.Context, sender, receiver string) (bool, error)
 	Block(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string) error
+	GetBlockedTypes(context context.Context, blockedBy, blockedFor string) ([]enum.NotificationType, error)
+	Unblock(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string)
 }
 
 func NewBlockNotificationRepository(db *mongo.Client) BlockNotificationRepository {
@@ -57,6 +59,32 @@ func (b *blockNotificationRepository) Block(context context.Context, notificatio
 	}
 
 	return nil
+}
+
+func (b *blockNotificationRepository) GetBlockedTypes(context context.Context, blockedBy, blockedFor string) ([]enum.NotificationType, error) {
+
+	filter, err := b.collection.Find(context, bson.M{"blocked_by" : blockedBy, "blocked_for" : blockedFor})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var blockedNotifications []domain.Notification
+	if err := filter.All(context, &blockedNotifications); err != nil {
+		return nil, err
+	}
+
+	notificationTypes := make([]enum.NotificationType, len(blockedNotifications))
+
+	for _, it:= range blockedNotifications {
+		_ = append(notificationTypes, it.Type)
+	}
+
+	return notificationTypes, nil
+}
+
+func (b *blockNotificationRepository) Unblock(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string) {
+	panic("implement me")
 }
 
 

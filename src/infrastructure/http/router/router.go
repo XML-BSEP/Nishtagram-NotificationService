@@ -13,5 +13,7 @@ func NewRoute(handler interactor.AppHandler) *gin.Engine {
 	router.GET("/notification/:userId", handler.GetNotificationsByUserId)
 	router.PUT("/notification/:notificationId", handler.UpdateNotificationStatus)
 	router.POST("/notification/block", handler.Block)
+
+	router.GET("/blockedNotification/blockedBy/:blockedBy/blockedFor/:blockedFor", handler.GetBlockedTypes)
 	return router
 }
