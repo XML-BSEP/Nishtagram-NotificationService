@@ -43,6 +43,7 @@ func NewInteractor(pusherClient *pusher.Client, db *mongo.Client, followClient f
 func (i *interactor) NewAppHandler() AppHandler {
 	appHandler := &appHandler{}
 	appHandler.NotificationHandler = handler.NewNotificationHandler(i.NewNotificationUsecase())
+	appHandler.BlockNotificationHandler = handler.NewBlockNotificationHandler(i.NewBlockNotificationUsecase())
 	return appHandler
 }
 
@@ -64,10 +65,12 @@ func (i *interactor) NewNotificationRepository() repository.NotificationReposito
 
 type appHandler struct {
 	handler.NotificationHandler
+	handler.BlockNotificationHandler
 }
 
 type AppHandler interface {
 	handler.NotificationHandler
+	handler.BlockNotificationHandler
 }
 
 func (i *interactor) NewBlockNotificationUsecase() usecase.BlockNotificationUsecase {
