@@ -10,10 +10,10 @@ type blockNotificationUsecase struct {
 	BlockNotificationRepository repository.BlockNotificationRepository
 }
 
-
 type BlockNotificationUsecase interface {
 	IsBlocked(context context.Context, sender, receiver string) (bool, error)
 	Block(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string) error
+	GetBlockedTypes(context context.Context, blockedBy, blockedFor string) ([]enum.NotificationType, error)
 }
 
 func NewBlockNotificationUsecase(blockNotificationRepository repository.BlockNotificationRepository) BlockNotificationUsecase {
@@ -26,4 +26,8 @@ func (b *blockNotificationUsecase) IsBlocked(context context.Context, sender, re
 
 func (b *blockNotificationUsecase) Block(context context.Context, notificationType enum.NotificationType, blockedBy, blockedFor string) error {
 	return b.BlockNotificationRepository.Block(context, notificationType, blockedBy, blockedFor)
+}
+
+func (b *blockNotificationUsecase) GetBlockedTypes(context context.Context, blockedBy, blockedFor string) ([]enum.NotificationType, error) {
+	return b.BlockNotificationRepository.GetBlockedTypes(context, blockedBy, blockedFor)
 }
