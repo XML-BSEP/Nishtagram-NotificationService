@@ -24,33 +24,33 @@ func NotificationTypeDtoToNotificationType(dto dto.NotificationTypeDto) enum.Not
 }
 
 func NotificationTypeToNotificationTypeDto(notifications []enum.NotificationType) []dto.NotificationTypeDto {
-
-	notificationTypes := make([]dto.NotificationTypeDto, len(notifications))
+	var notificationTypes []dto.NotificationTypeDto
+	//notificationTypes := make([]dto.NotificationTypeDto, len(notifications))
 
 	for _, it := range notifications {
 		if it == 0 {
 			notificationTypeDto := dto.NotificationTypeDto{Type: "like", Value: true}
-			_ = append(notificationTypes, notificationTypeDto)
+			notificationTypes = append(notificationTypes, notificationTypeDto)
 		}
 		if it == 1 {
 			notificationTypeDto := dto.NotificationTypeDto{Type: "dislike", Value: true}
-			_ = append(notificationTypes, notificationTypeDto)
+			notificationTypes = append(notificationTypes, notificationTypeDto)
 		}
 		if it == 2 {
 			notificationTypeDto := dto.NotificationTypeDto{Type: "comment", Value: true}
-			_ = append(notificationTypes, notificationTypeDto)
+			notificationTypes = append(notificationTypes, notificationTypeDto)
 		}
 		if it == 3 {
 			notificationTypeDto := dto.NotificationTypeDto{Type: "post", Value: true}
-			_ = append(notificationTypes, notificationTypeDto)
+			notificationTypes = append(notificationTypes, notificationTypeDto)
 		}
 		if it == 4 {
 			notificationTypeDto := dto.NotificationTypeDto{Type: "follow", Value: true}
-			_ = append(notificationTypes, notificationTypeDto)
+			notificationTypes = append(notificationTypes, notificationTypeDto)
 		}
 		if it == 5 {
 			notificationTypeDto := dto.NotificationTypeDto{Type: "story", Value: true}
-			_ = append(notificationTypes, notificationTypeDto)
+			notificationTypes = append(notificationTypes, notificationTypeDto)
 		}
 	}
 

@@ -16,6 +16,7 @@ type blockNotificationHandler struct {
 type BlockNotificationHandler interface {
 	Block(ctx *gin.Context)
 	GetBlockedTypes(ctx *gin.Context)
+	Unblock(ctx *gin.Context)
 }
 
 func NewBlockNotificationHandler(blockNotificationUsecase usecase.BlockNotificationUsecase) BlockNotificationHandler {
@@ -42,7 +43,26 @@ func (b *blockNotificationHandler) Block(ctx *gin.Context) {
 
 
 	ctx.JSON(200, gin.H{"message" : "Successfully blocked notification"})
+	return
+}
+func (b *blockNotificationHandler) Unblock(ctx *gin.Context) {
+	decoder := json.NewDecoder(ctx.Request.Body)
 
+	var notificationDto dto.BlockNotificationDto
+
+	if err := decoder.Decode(&notificationDto); err != nil {
+		ctx.JSON(400, gin.H{"message" : "Error decoding body"})
+		return
+	}
+	notificationType := mapper.NotificationTypeDtoToNotificationType(notificationDto.NotificationType)
+
+	if err := b.BlockNotificationUsecase.Unblock(ctx, notificationType, notificationDto.UserBy, notificationDto.UserFor); err != nil {
+		ctx.JSON(400, gin.H{"message" : "Can not block notification"})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"message" : "Successfully unblocked notification"})
+	return
 }
 
 func (b *blockNotificationHandler) GetBlockedTypes(ctx *gin.Context) {
@@ -60,4 +80,5 @@ func (b *blockNotificationHandler) GetBlockedTypes(ctx *gin.Context) {
 	blockedTypesDto := mapper.NotificationTypeToNotificationTypeDto(blockedTypes)
 
 	ctx.JSON(200, blockedTypesDto)
+	return
 }
