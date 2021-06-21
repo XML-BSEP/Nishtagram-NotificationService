@@ -82,5 +82,9 @@ func (n *notificationUsecase) CreateNotificationContent(sender string, notificat
 		return sender + " commented your post"
 	}
 
+	if notificationType == enum.Post {
+		return sender + " added new post"
+	}
+
 	return ""
 }
