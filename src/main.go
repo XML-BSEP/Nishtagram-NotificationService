@@ -45,6 +45,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	var notificationDomain string
+	if os.Getenv("DOCKER_ENV") == "" {
+		notificationDomain = "127.0.0.1:8077"
+	} else {
+		notificationDomain = "followms:8077"
+	}
+	followClient, err := client.NewFollowClient(notificationDomain)
+
 	var followDomain string
 	var userDomain string
 	if os.Getenv("DOCKER_ENV") == "" {
@@ -59,8 +67,9 @@ func main() {
 	}
 	followDomain = followDomain + ":" + strconv.Itoa(int(8077))
 	userDomain = userDomain + ":" + strconv.Itoa(int(8075))
-	followClient, err := client.NewFollowClient(followDomain)
+	followClient, err = client.NewFollowClient(followDomain)
 	userClient, err := userClient.NewUserClient(userDomain)
+
 	if err != nil {
 		panic(err)
 	}
@@ -85,6 +94,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 
 	_ = interceptor.NewAuthUnaryInterceptor() //call authorization interceptor
 	grpcServer := grpc.NewServer()
